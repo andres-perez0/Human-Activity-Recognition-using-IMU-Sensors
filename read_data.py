@@ -2,41 +2,74 @@ import serial
 import datetime
 import csv
 
-COM='COM6'
-BD_RATE=9600
-TIME_OUT=0.1
-FILENAME="data.csv"
+class SerialCtrl():
+    def __init__(self):
+        self.COM='COM6'
+        self.BD_RATE=9600
+        self.TIME_OUT=0.1
+        self.FILENAME="data.csv"
+        self.uart=True
 
-global uart
-uart=True
+    def SerialOpen(self):
+        try: 
+            self.ser.is_open
+        except:
+            self.ser=serial.Serial(port=self.COM,baudrate=self.BD_RATE,timeout=self.TIME_OUT)
+        
+        try: 
+            if self.ser.is_open:
+                print("Already Open")
+                self.ser.status=True
+            else: 
+                self.ser=serial.Serial(port=self.COM,baudrate=self.BD_RATE,timeout=self.TIME_OUT)
+                print("Opening Serial")
+                self.ser.open()
+                self.ser.status=True
+        except:
+            self.ser.status=False
 
-def my_serial():
-    global uart
-    ser = serial.Serial(port=COM,baudrate=BD_RATE,timeout=TIME_OUT)
+    def SerialClose(self):
+        try:
+            self.ser.is_open
+            self.ser.close()
+            self.ser.status=False
+        except:
+            print("Already closed")
+            self.ser.status = False
 
-    with open(FILENAME, "w", newline='') as f: 
-        writer = csv.writer(f)
-        writer.writerow(['Timestamp', 'accX', 'accY', 'accZ','gyroX', 'gyroY', 'gyroZ'])
-        while uart:
-            data=ser.readline()
-            if len(data) > 0:
-                try:
-                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
-                    # print(timestamp, end='')
+    def SelectActivity(self):
+        self.activity_label = input('please enter the acitivity you intend to measure: ').strip()        
 
-                    sensor_data=data.decode('utf-8').strip()
-                    information = sensor_data.split(',')
-                    information = [float(item) for item in information]
-                    # print(*information)
-                    row_to_write = [timestamp] + information 
+    def StartStream(self):
+        # Implement Threading Logic Here
+        with open("data.csv", "w", newline='') as f: 
+            writer = csv.writer(f)
+            writer.writerow(['Timestamp', 'activity_label', 'accX', 'accY', 'accZ', 'gyroX', 'gyroY', 'gyroZ'])
+            while self.uart:
+                data=self.ser.readline()
+                if len(data) > 0:
+                    try:
+                        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
+                        # print(timestamp, end='')
 
-                    writer.writerow(row_to_write)
-                except:
-                    pass
-    ser.close()
+                        sensor_data=data.decode('utf-8').strip()
+                        information = sensor_data.split(',')
+                        information = [float(item) for item in information]
+                        # print(*information)
+                        row_to_write = [timestamp] + [self.activity_label] + information 
 
-try:     
-    my_serial()
-except KeyboardInterrupt:
-    print("User Terminated the program")
-    uart=False
+                        writer.writerow(row_to_write)
+                    except:
+                        pass
+
+if __name__=="__main__":
+    serial_control=SerialCtrl()
+    serial_control.SerialOpen()
+    serial_control.SelectActivity()
+    try: 
+        serial_control.StartStream()
+    except KeyboardInterrupt:
+        print("User ended streaming")
+        
+    serial_control.SerialClose()
+
