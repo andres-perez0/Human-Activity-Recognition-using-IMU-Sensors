@@ -1,4 +1,5 @@
 import serial
+import time
 import datetime
 import csv
 
@@ -7,8 +8,9 @@ class SerialCtrl():
         self.COM='COM6'
         self.BD_RATE=9600
         self.TIME_OUT=0.1
-        self.FILENAME="data.csv"
-        self.uart=True
+
+        self.file_index=0
+        self.filename=f"mpu9250_data{self.file_index}.csv"
 
     def SerialOpen(self):
         try: 
@@ -38,21 +40,26 @@ class SerialCtrl():
             self.ser.status = False
 
     def SelectActivity(self):
-        self.activity_label = input('please enter the acitivity you intend to measure: ').strip()        
+        print('please enter the acitivity you intend to measure for a minute: ')
+        self.activity_label = input('> ').strip().lower()        
 
     def StartStream(self):
         # Implement Threading Logic Here
-        with open("data.csv", "w", newline='') as f: 
+
+        start_time=time.time()
+        with open(self.filename, "w", newline='') as f: 
             writer = csv.writer(f)
             writer.writerow(['Timestamp', 'activity_label', 'accX', 'accY', 'accZ', 'gyroX', 'gyroY', 'gyroZ'])
-            while self.uart:
+            
+            while time.time() - start_time < 60:             
                 data=self.ser.readline()
+
                 if len(data) > 0:
                     try:
                         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
                         # print(timestamp, end='')
-
                         sensor_data=data.decode('utf-8').strip()
+
                         information = sensor_data.split(',')
                         information = [float(item) for item in information]
                         # print(*information)
@@ -62,14 +69,18 @@ class SerialCtrl():
                     except:
                         pass
 
+        print(f"{self.filename} complete! :)")
+        self.file_index += 1
+
 if __name__=="__main__":
     serial_control=SerialCtrl()
     serial_control.SerialOpen()
     serial_control.SelectActivity()
-    try: 
+    
+    try:
         serial_control.StartStream()
     except KeyboardInterrupt:
-        print("User ended streaming")
-        
-    serial_control.SerialClose()
+        print("user terminated")
+        serial_control.SerialClose()
 
+    serial_control.SerialClose()
