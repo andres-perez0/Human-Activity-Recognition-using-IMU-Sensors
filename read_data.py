@@ -33,8 +33,6 @@ class SerialCtrl():
         
         print(f"Your current file is {self.filename}")
         
-        
-
 
     def SerialOpen(self):
         try: 
