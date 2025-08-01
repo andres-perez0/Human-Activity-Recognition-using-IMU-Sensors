@@ -1,0 +1,27 @@
+/*
+  Arduino Wireless Communication Code
+  Transmitter Code - Hello World Example
+  Inspired and Learnt from Dejan Nedelkovski
+  Link: https://howtomechatronics.com/tutorials/arduino/arduino-wireless-communication-nrf24l01-tutorial/
+*/
+
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+RF24 radio(7, 8); // CE, CSN
+
+const byte address[6] = "00001";
+
+void setup() {
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.stopListening();
+}
+
+void loop() {
+  const char text[] = "Hello World";
+  radio.write(&text, sizeof(text));
+  delay(1000);
+}
