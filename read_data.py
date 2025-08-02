@@ -6,7 +6,7 @@ import csv
 
 class SerialCtrl():
     def __init__(self):
-        self.COM='COM6'
+        self.COM='COM3'
         self.BD_RATE=9600
         self.TIME_OUT=0.1
 
@@ -67,8 +67,7 @@ class SerialCtrl():
         self.activity_label = input('> ').strip().lower()        
 
     def StartStream(self):
-        # Implement Threading Logic Here
-
+        time.sleep(10) # A Pause so to get into the activity
         start_time=time.time()
         self.filename=os.path.join(self.folder_name,self.filename)
         with open(self.filename, "w", newline='') as f: 
