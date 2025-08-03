@@ -1,8 +1,9 @@
 /*
   Arduino Wireless Communication Code
-  Reciever Code - Hello World Example
-  Inspired and Learnt from Dejan Nedelkovski
+  Reciever Code
+  Inspired and Learnt from Dejan Nedelkovski and Arduino Forums
   Link: https://howtomechatronics.com/tutorials/arduino/arduino-wireless-communication-nrf24l01-tutorial/
+  Link: https://projecthub.arduino.cc/tmekinyan/how-to-use-the-nrf24l01-module-with-arduino-813957 
 */
 
 #include <SPI.h>
@@ -49,7 +50,6 @@ void loop() {
   } else {
     Serial.println("waiting");
   }
-  delay(100);
 }
 
 void read_Data() {

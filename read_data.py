@@ -1,3 +1,4 @@
+from visual_data import visualData
 import serial
 import time
 import os
@@ -26,12 +27,14 @@ class SerialCtrl():
             return False
 
     def updateFileName(self):
-        
         while self.checkIfFileExist(self.filename):
+            currentFile=os.path.join(self.folder_name, self.filename)
+
             self.file_index += 1
             self.filename=f"mpu9250_data{self.file_index}.csv"
         
-        print(f"Your current file is {self.filename}")
+        print(f"Your new file is {self.filename}")
+        return currentFile
         
 
     def SerialOpen(self):
@@ -67,7 +70,15 @@ class SerialCtrl():
         self.activity_label = input('> ').strip().lower()        
 
     def StartStream(self):
-        time.sleep(10) # A Pause so to get into the activity
+        print("please get into position you have 5 seconds")
+        
+        for i in range(5):
+            print(f"starts in {5-(i+1)}")
+            time.sleep(1) 
+
+        # Clear the input buffer to get rid of any old data
+        self.ser.flushInput()
+
         start_time=time.time()
         self.filename=os.path.join(self.folder_name,self.filename)
         with open(self.filename, "w", newline='') as f: 
@@ -97,21 +108,3 @@ class SerialCtrl():
         self.file_index += 1
         self.filename=f"mpu9250_data{self.file_index}.csv"
 
-
-if __name__=="__main__":
-    serial_control=SerialCtrl()
-    serial_control.updateFileName()
-
-    serial_control.SerialOpen()
-    
-
-    while True:
-        try:
-            serial_control.SelectActivity()
-            serial_control.StartStream()
-        except KeyboardInterrupt:
-            print("user terminated")
-            serial_control.SerialClose()
-            break
-
-    serial_control.SerialClose()

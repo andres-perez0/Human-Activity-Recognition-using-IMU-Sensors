@@ -14,6 +14,7 @@
 
 #define CE_PIN 7
 #define CSN_PIN 8
+// #define INTERVAL_MS_TRANSMISSION 250 
 
 RF24 radio(CE_PIN, CSN_PIN); 
 MPU9250 mpu;
@@ -29,9 +30,7 @@ struct payLoad {
   float gyroX;
   float gyroY;
   float gyroZ;
-};
-
-payLoad payLoad;
+} payLoad;
 
 void setup() {
   // Serial Functions commented out because we're tramsitting a packet
@@ -48,13 +47,24 @@ void setup() {
   radio.stopListening();
 
   Wire.begin();
+  delay(2000);
+  MPU9250Setting setting;
+  setting.accel_fs_sel = ACCEL_FS_SEL::A4G;
+  setting.gyro_fs_sel = GYRO_FS_SEL::G1000DPS;
+  setting.mag_output_bits = MAG_OUTPUT_BITS::M16BITS;
+  setting.fifo_sample_rate = FIFO_SAMPLE_RATE::SMPL_200HZ;
+  setting.gyro_fchoice = 0x03;
+  setting.gyro_dlpf_cfg = GYRO_DLPF_CFG::DLPF_41HZ;
+  setting.accel_fchoice = 0x01;
+  setting.accel_dlpf_cfg = ACCEL_DLPF_CFG::DLPF_45HZ;
 
-  if (!mpu.setup(0x68)) {
+  if (!mpu.setup(0x68, setting)) {
     while (1) {
       // Serial.println("MPU connection failed. Please check your connection");
       delay(5000);
     }
   }
+  mpu.setMagneticDeclination(11.37); // param = magnetic declination in decimal degrees; LB = +11° 22'; 11 + (22/60)
   // Serial.println("Arduino Ready");
 }
 
@@ -62,7 +72,7 @@ void loop() {
   if (mpu.update()) {
     send_data();
   }
-  delay(100);
+  // delay(INTERVAL_MS_TRANSMISSION);
 }
 
 void send_data() {

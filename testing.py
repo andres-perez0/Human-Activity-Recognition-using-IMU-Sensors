@@ -1,7 +1,7 @@
 # Counting the number of rows in a csv file
 import pandas as pd
 
-df=pd.read_csv('IMU_Data\mpu9250_data13.csv')
+df=pd.read_csv('IMU_Data_2\mpu9250_data15.csv')
 csvLength = len(df)
 
 print(f"the df is {csvLength} rows.\nthe df shape is {df.shape}")
