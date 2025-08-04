@@ -89,7 +89,7 @@ train_data = TensorDataset(train_data, train_labels)
 test_data = TensorDataset(test_data, test_labels)
 
 # Translate into dataloader objects
-batchsize = 64
+batchsize = 32
 train_loader = DataLoader(train_data, batch_size=batchsize,shuffle=True,drop_last=True)
 test_loader = DataLoader(test_data, batch_size=test_data.tensors[0].shape[0])
 
@@ -120,7 +120,7 @@ class HARModel(nn.Module):
 
 
 
-numepochs=1000
+numepochs=500
 
 def trainTheModel():
     lossfun=nn.BCEWithLogitsLoss()
