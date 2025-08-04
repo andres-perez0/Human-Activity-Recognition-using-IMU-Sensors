@@ -20,166 +20,139 @@ import seaborn as sns
 # for file mangement
 import glob
 import os
-
-def combineCSV():
-    relativePath='IMU_Data'
-
-    allFile = glob.glob(os.path.join(relativePath, '*.csv')) 
-    df_list=[]
-
-    for fN in allFile:
-        # print(fN)
-        df = pd.read_csv(fN, header=0,on_bad_lines='skip')
-        df_list.append(df)
-
-    combine_df = pd.concat(df_list,axis=0,ignore_index=True)
-    combine_df.to_csv('combine_mpu9250.csv', index=False,encoding='utf-8)')
-
-# print(data.head())
-# print(data.describe())
-
-# list number of unique values per columns
-# for i in data.keys():
-#     print(f"{i} has {len(np.unique(data[i]))} unique values")
-
-
-'''
-# pairwise plots
-cols2plot=['activity_label','accX',  'accY',  'accZ']
-#  'gyroX',  'gyroY',  'gyroZ'
-sns.pairplot(data[cols2plot],kind='reg',hue='activity_label')
-plt.show()
-'''
-
-'''fig,ax = plt.subplots(1,figsize=(17,4))
-ax = sns.boxplot(data=data)
-ax.set_xticklabels(ax.get_xticklabels(),rotation=45)
-plt.show()'''
+import time
 
 # read data from the combine csv
 data = pd.read_csv('combine_mpu9250.csv', sep=',')
+print(data.describe())
+print(data.head())
+# # sliding window to create segment of value data
 
-# z-score all variables except for activity_label
-cols2zscore=data.keys()
-cols2zscore = cols2zscore.drop('Timestamp')
-cols2zscore = cols2zscore.drop('activity_label')
+# # z-score all variables except for activity_label
+# cols2zscore=data.keys()
+# cols2zscore = cols2zscore.drop('activity_label')
 
-# normalizes data
-data[cols2zscore] = data[cols2zscore].apply(stats.zscore)
+# # normalizes data
+# data[cols2zscore] = data[cols2zscore].apply(stats.zscore)
 
-data['bool_activity']=0
-data['bool_activity'][data['activity_label']=='walking'] = 1
+# data['bool_activity']=0
+# data['bool_activity'][data['activity_label']=='walking'] = 1
 
-# print(data[['bool_activity','activity_label']])
+# # print(data[['bool_activity','activity_label']])
 
-# # convert from pandas dataframe to tensor
-dataT = torch.tensor(data[cols2zscore].values).float()
-labelT = torch.tensor(data['bool_activity'].values).float()
+# # # convert from pandas dataframe to tensor
+# dataT = torch.tensor(data[cols2zscore].values).float()
+# labelT = torch.tensor(data['bool_activity'].values).float()
 # print(f"the data tensor shape is {dataT.shape}\nthe label tensor shape is {labelT.shape}")
 
-# labels need to be a "tensor"
-labelT = labelT[:, None]
+# # labels need to be a "tensor"
+# labelT = labelT[:, None]
 # print(f'new shape is {labelT.shape}')
 
-# use scikitlearn to split the data
-train_data, test_data, train_labels, test_labels = train_test_split(dataT, labelT, test_size=.2)
+# # use scikitlearn to split the data
+# train_data, test_data, train_labels, test_labels = train_test_split(dataT, labelT, test_size=.1)
 
-# convert them into PyTorch Datasets 
-train_data = TensorDataset(train_data, train_labels)
-test_data = TensorDataset(test_data, test_labels)
+# # convert them into PyTorch Datasets 
+# train_data = TensorDataset(train_data, train_labels)
+# test_data = TensorDataset(test_data, test_labels)
 
-# Translate into dataloader objects
-batchsize = 32
-train_loader = DataLoader(train_data, batch_size=batchsize,shuffle=True,drop_last=True)
-test_loader = DataLoader(test_data, batch_size=test_data.tensors[0].shape[0])
+# # Translate into dataloader objects
+# batchsize = 32
+# train_loader = DataLoader(train_data, batch_size=batchsize,shuffle=True,drop_last=True)
+# test_loader = DataLoader(test_data, batch_size=test_data.tensors[0].shape[0])
 
-'''
-# Check sizes of data batches 
-for x, y in train_loader:
-    # Remeber to set drop_last=True
-    print(x.shape, y.shape)
-'''
+# class HARModel(nn.Module):
+#     # New class inherited from the nn.module
+#     def __init__(self):
+#         super().__init__() # `super()` allows python to access function from nn.module (parent class)
+#         # input layer
+#         self.input = nn.Linear(6, 16)
 
-class HARModel(nn.Module):
-    # New class inherited from the nn.module
-    def __init__(self):
-        super().__init__() # `super()` allows python to access function from nn.module (parent class)
-        # input layer
-        self.input = nn.Linear(6,16)
+#         # hidden layer 8 minutes and 23 seconds
+#         self.hidden1=nn.Linear(16, 32)
+#         self.hidden2=nn.Linear(32, 32)
 
-        # hidden layer
-        self.hidden1=nn.Linear(16, 32)
+#         # output layer
+#         self.output = nn.Linear(32, 1)
 
-        # output layer
-        self.output = nn.Linear(32,1)
+#     def forward(self, x):
+#         x = F.relu(self.input(x))
+#         x = F.relu(self.hidden1(x))
+#         x = F.relu(self.hidden2(x))
+#         return self.output(x)
 
-    def forward(self, x):
-        x = F.relu(self.input(x))
-        x = F.relu(self.hidden1(x))
-        return self.output(x)
+# numepochs=500
 
+# def trainTheModel():
+#     lossfun=nn.BCEWithLogitsLoss()
+#     optimizer=torch.optim.SGD(HARnet.parameters(),lr=0.1)
 
+#     # initialize loss
+#     losses=torch.zeros(numepochs)
+#     trainAcc=[]
+#     testAcc=[]
 
-numepochs=500
+#     # loop over epochs
+#     for epochi in range(numepochs):
+#         HARnet.train()  # sets the model to training mode
 
-def trainTheModel():
-    lossfun=nn.BCEWithLogitsLoss()
-    optimizer=torch.optim.Adam(HARnet.parameters(),lr=0.1)
+#         # loop over training data batches
+#         batchAcc=[]
+#         batchLoss=[]
 
-    # initialize loss
-    losses=torch.zeros(numepochs)
-    trainAcc=[]
-    testAcc=[]
+#         for x, y in train_loader:
+#             # forward pass and losses
+#             yHat = HARnet(x)
+#             loss = lossfun(yHat,y)
 
-    # loop over epochs
-    for epochi in range(numepochs):
-        HARnet.train()  # sets the model to training mode
+#             # back prop
+#             optimizer.zero_grad()
+#             loss.backward()
+#             optimizer.step()
 
-        # loop over training data batches
-        batchAcc=[]
-        batchLoss=[]
+#             # losses from this batch
+#             batchLoss.append(loss.item())
 
-        for x, y in train_loader:
-            # forward pass and losses
-            yHat = HARnet(x)
-            loss = lossfun(yHat,y)
-
-            # back prop
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            # losses from this batch
-            batchLoss.append(loss.item())
-
-            # compute training accuracy for this batch
-            batchAcc.append( 100*torch.mean(((yHat>0) == y).float()).item() )
+#             # compute training accuracy for this batch
+#             batchAcc.append( 100*torch.mean(((yHat>0) == y).float()).item() )
         
-        # now that we've trained through the batches, get their average training accuracy
-        trainAcc.append( np.mean(batchAcc) )
-        # end of batch loop
-        losses[epochi] = np.mean(batchLoss)
+#         # now that we've trained through the batches, get their average training accuracy
+#         trainAcc.append( np.mean(batchAcc) )
+#         # end of batch loop
+#         losses[epochi] = np.mean(batchLoss)
 
-        # test accuracy
-        HARnet.eval()
-        x_1,y = next(iter(test_loader)) # extract X, y from test dataloader
-        with torch.no_grad(): # deactivates auto grad
-            yHat=HARnet(x_1)
+#         # test accuracy
+#         HARnet.eval()
 
-        testAcc.append( 100*torch.mean(((yHat>0) == y).float()).item())
+#         x,y = next(iter(test_loader)) # extract X, y from test dataloader
+#         with torch.no_grad(): # deactivates auto grad
+#             yHat=HARnet(x)
 
-    # function output
-    return trainAcc, testAcc, losses
+#         testAcc.append( 100*torch.mean(((yHat>0) == y).float()).item())
 
-HARnet=HARModel()
-trainAcc,testAcc,losses = trainTheModel()
-# print(losses)
+#     # function output
+#     return trainAcc, testAcc, losses
 
-fig, ax = plt.subplots(1,2,figsize=(6,3))
+# startTime=time.time()
 
-ax[0].plot(trainAcc)
-ax[1].plot(testAcc)
+# HARnet=HARModel()
+# trainAcc,testAcc,losses = trainTheModel()
 
-plt.show()
+# endTime=time.time()
+# print(f"your model train for {int((endTime-startTime) // 60)} minutes and {int((endTime-startTime) % 60)} seconds")
+
+# fig, ax = plt.subplots(1,2,figsize=(6,3))
+
+# ax[0].plot(trainAcc)
+# ax[0].set_title('training accuracy (%)')
+# ax[0].set_xlabel('percentage')
+# ax[0].set_xlabel('epochs')
+
+# ax[1].plot(testAcc)
+# ax[1].set_title('test accuracy (%)')
+# ax[1].set_xlabel('percentage')
+# ax[1].set_xlabel('epochs')
+
+# plt.show()
 
         

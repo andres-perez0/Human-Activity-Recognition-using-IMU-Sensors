@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import glob
+import os
 
 class visualData():
     def __init__(self,fileName):
@@ -38,10 +40,25 @@ class visualData():
         
         plt.tight_layout()
         plt.show()
+    
+    def combineCSV(self):
+        relativePath='IMU_Data'
+
+        allFile = glob.glob(os.path.join(relativePath, '*.csv')) 
+        df_list=[]
+
+        for fN in allFile:
+            # print(fN)
+            df = pd.read_csv(fN, header=0,on_bad_lines='skip')
+            df_list.append(df)
+            # df_list.append(df[['activity_label','accX','accY','accZ','gyroX','gyroY','gyroZ']])
+
+        combine_df = pd.concat(df_list,axis=0,ignore_index=True)
+        combine_df.to_csv('combine_mpu9250.csv', index=False,encoding='utf-8)')
 
 if __name__ == "__main__": 
-    fileName="IMU_Data/mpu9250_data10.csv"
+    fileName="IMU_Data/mpu9250_data01.csv"
     visualDataInstance=visualData(fileName)
-
+    visualDataInstance.combineCSV()
     visualDataInstance.initializeDataFrame()
     visualDataInstance.graphData()
