@@ -14,7 +14,8 @@ class visualData():
         # self.csvLength=len(csvFiltered)
 
         # self.data=csvFiltered.iloc[:, 2:8]
-        self.data=pd.read_csv(self.fileName,header=[0,5],on_bad_lines='skip').iloc[:,2:8]
+        self.data=pd.read_csv(self.fileName,header=0,on_bad_lines='skip').iloc[10:,2:8]
+        print(self.data)
     
     def additionalInformation(self):
         print('Incomplete Rows:') 
@@ -24,18 +25,22 @@ class visualData():
         index=0
         graphColors=['r','g','b','r','g','b']
         graphLabels=['accX','accY','accZ','gyroX','gyroY','gyroZ']
+        yLabels=['m/$s^2$ ($\pm$ 4g)','°/sec ($\pm 1000 °/sec$)']
 
         for ix in range(2):
             for iy in range(3):
                 self.ax[ix,iy].plot(self.data.loc[:,graphLabels[index]], graphColors[index])
                 self.ax[ix,iy].set_title(graphLabels[index])
                 index+=1
+        self.ax[0,0].set_ylabel(yLabels[0])
+        self.ax[1,0].set_ylabel(yLabels[1])
+
         
         plt.tight_layout()
         plt.show()
 
 if __name__ == "__main__": 
-    fileName="IMU_Data/mpu9250_data0.csv"
+    fileName="IMU_Data/mpu9250_data10.csv"
     visualDataInstance=visualData(fileName)
 
     visualDataInstance.initializeDataFrame()

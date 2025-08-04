@@ -13,7 +13,7 @@ class SerialCtrl():
 
         self.file_index=0
         self.folder_name="IMU_Data"
-        self.filename=f"mpu9250_data{self.file_index}.csv"
+        self.filename=f"mpu9250_data{self.file_index:02}.csv"
 
     def checkIfFileExist(self, currFilename):
         ''' Checks if the existence of the file before running the next data collection'''
@@ -28,13 +28,14 @@ class SerialCtrl():
 
     def updateFileName(self):
         while self.checkIfFileExist(self.filename):
-            currentFile=os.path.join(self.folder_name, self.filename)
+            # currentFile=os.path.join(self.folder_name, self.filename)
 
             self.file_index += 1
-            self.filename=f"mpu9250_data{self.file_index}.csv"
+            self.filename=f"mpu9250_data{self.file_index:02}.csv"
         
         print(f"Your new file is {self.filename}")
-        return currentFile
+
+        # return currentFile
         
 
     def SerialOpen(self):
