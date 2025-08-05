@@ -79,156 +79,170 @@ data = pd.read_csv('combine_mpu9250.csv', sep=',')
 
 window_size=250
 overlap_percentage=0.3
-train_data, test_data, train_labels, test_labels = preprocess_and_spilt(data, window_size, overlap_percentage,0.3)
+train_data, test_data, train_labels, test_labels = preprocess_and_spilt(data, window_size, overlap_percentage,0.1)
 
-train_data = torch.from_numpy(train_data).float()
-test_data = torch.from_numpy(test_data).float()
+X_train_flat = np.array([window.reshape(-1) for window in train_data])
+X_test_flat = np.array([window.reshape(-1) for window in test_data])
 
-train_labels = torch.from_numpy(train_labels).long()
-test_labels = torch.from_numpy(test_labels).long()
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import accuracy_score, mean_squared_error
 
-# convert them into PyTorch Datasets 
-train_data = TensorDataset(train_data, train_labels)
-test_data = TensorDataset(test_data, test_labels)
 
-# Translate into dataloader objects
-batchsize = 16
-train_loader = DataLoader(train_data, batch_size=batchsize,shuffle=True,drop_last=True)
-test_loader = DataLoader(test_data, batch_size=batchsize)
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train_flat, train_labels)
+rf_predicitions = rf_model.predict(X_test_flat)
+rf_accuracy = accuracy_score(test_labels, rf_predicitions)
 
-class HARModel(nn.Module):
-    # New class inherited from the nn.module
-    def __init__(self, input_features, num_classes):
-        super(HARModel, self).__init__() # `super()` allows python to access function from nn.module (parent class)
+print(f"Random Forest Classifier Accuracy: {rf_accuracy * 100:.2f}")
+
+# train_data = torch.from_numpy(train_data).float()
+# test_data = torch.from_numpy(test_data).float()
+
+# train_labels = torch.from_numpy(train_labels).long()
+# test_labels = torch.from_numpy(test_labels).long()
+
+# # convert them into PyTorch Datasets 
+# train_data = TensorDataset(train_data, train_labels)
+# test_data = TensorDataset(test_data, test_labels)
+
+# # Translate into dataloader objects
+# batchsize = 16
+# train_loader = DataLoader(train_data, batch_size=batchsize,shuffle=True,drop_last=True)
+# test_loader = DataLoader(test_data, batch_size=batchsize)
+
+# class HARModel(nn.Module):
+#     # New class inherited from the nn.module
+#     def __init__(self, input_features, num_classes):
+#         super(HARModel, self).__init__() # `super()` allows python to access function from nn.module (parent class)
         
-        self.conv1=nn.Conv1d(
-            in_channels=input_features,
-            out_channels=64,
-            kernel_size=5,
-            padding=2
-        )
-        self.relu = nn.ReLU()
-        self.flatten = nn.Flatten()
+#         self.conv1=nn.Conv1d(
+#             in_channels=input_features,
+#             out_channels=64,
+#             kernel_size=5,
+#             padding=2
+#         )
+#         self.relu = nn.ReLU()
+#         self.flatten = nn.Flatten()
 
-        self.fc1 = nn.Linear(64 * 250, 128)
-        self.fc2 = nn.Linear(128, num_classes) # num_classes = 2 (sitting, walking)
+#         self.fc1 = nn.Linear(64 * 250, 128)
+#         self.fc2 = nn.Linear(128, num_classes) # num_classes = 2 (sitting, walking)
 
-        # input layer
-        # self.input = nn.Linear(6, 16)
+#         # input layer
+#         # self.input = nn.Linear(6, 16)
 
-        # hidden layer 8 minutes and 23 seconds
-        # self.hidden1=nn.Linear(16, 32)
-        # self.hidden2=nn.Linear(32, 32)
+#         # hidden layer 8 minutes and 23 seconds
+#         # self.hidden1=nn.Linear(16, 32)
+#         # self.hidden2=nn.Linear(32, 32)
 
-        # # output layer
-        # self.output = nn.Linear(32, 1)
+#         # # output layer
+#         # self.output = nn.Linear(32, 1)
 
-    def forward(self, x):
-        x=x.permute(0,2,1)
+#     def forward(self, x):
+#         x=x.permute(0,2,1)
 
-        # Forward pass through the convolutional layers
-        x = self.conv1(x)
-        x = self.relu(x)
+#         # Forward pass through the convolutional layers
+#         x = self.conv1(x)
+#         x = self.relu(x)
         
-        # Flatten the output for the fully connected layers
-        x = self.flatten(x)
+#         # Flatten the output for the fully connected layers
+#         x = self.flatten(x)
         
-        # Forward pass through the fully connected layers
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
+#         # Forward pass through the fully connected layers
+#         x = self.fc1(x)
+#         x = self.relu(x)
+#         x = self.fc2(x)
         
-        return x
-        # x = F.relu(self.input(x))
-        # x = F.relu(self.hidden1(x))
-        # x = F.relu(self.hidden2(x))
-        # return self.output(x)
+#         return x
+#         # x = F.relu(self.input(x))
+#         # x = F.relu(self.hidden1(x))
+#         # x = F.relu(self.hidden2(x))
+#         # return self.output(x)
 
-numepochs=500
+# numepochs=500
 
-def trainTheModel():
-    lossfun=nn.CrossEntropyLoss()
-    optimizer=torch.optim.Adam(HARnet.parameters(),lr=0.0005)
+# def trainTheModel():
+#     lossfun=nn.CrossEntropyLoss()
+#     optimizer=torch.optim.Adam(HARnet.parameters(),lr=0.0005)
 
-    # initialize loss
-    losses=torch.zeros(numepochs)
-    trainAcc=[]
-    testAcc=[]
+#     # initialize loss
+#     losses=torch.zeros(numepochs)
+#     trainAcc=[]
+#     testAcc=[]
 
-    # loop over epochs
-    for epochi in range(numepochs):
-        HARnet.train()  # sets the model to training mode
+#     # loop over epochs
+#     for epochi in range(numepochs):
+#         HARnet.train()  # sets the model to training mode
 
-        # loop over training data batches
-        batchAcc=[]
-        batchLoss=[]
+#         # loop over training data batches
+#         batchAcc=[]
+#         batchLoss=[]
 
-        for x, y in train_loader:
-            # forward pass and losses
-            yHat = HARnet(x)
-            loss = lossfun(yHat,y)
+#         for x, y in train_loader:
+#             # forward pass and losses
+#             yHat = HARnet(x)
+#             loss = lossfun(yHat,y)
 
-            # back prop
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+#             # back prop
+#             optimizer.zero_grad()
+#             loss.backward()
+#             optimizer.step()
 
-            # losses from this batch
-            batchLoss.append(loss.item())
+#             # losses from this batch
+#             batchLoss.append(loss.item())
 
-            # compute training accuracy for this batch
-            _, predicted = torch.max(yHat.data, 1)
-            batchAcc.append( 100 * (predicted == y).float().mean().item() )
+#             # compute training accuracy for this batch
+#             _, predicted = torch.max(yHat.data, 1)
+#             batchAcc.append( 100 * (predicted == y).float().mean().item() )
         
-        # now that we've trained through the batches, get their average training accuracy
-        trainAcc.append( np.mean(batchAcc) )
-        # end of batch loop
-        losses[epochi] = np.mean(batchLoss)
+#         # now that we've trained through the batches, get their average training accuracy
+#         trainAcc.append( np.mean(batchAcc) )
+#         # end of batch loop
+#         losses[epochi] = np.mean(batchLoss)
 
-        ''' # test accuracy
-        HARnet.eval()
-        x,y = next(iter(test_loader)) # extract X, y from test dataloader
-        with torch.no_grad(): # deactivates auto grad
-            yHat=HARnet(x)
-        testAcc.append( 100*torch.mean(((yHat>0) == y).float()).item())'''
+#         ''' # test accuracy
+#         HARnet.eval()
+#         x,y = next(iter(test_loader)) # extract X, y from test dataloader
+#         with torch.no_grad(): # deactivates auto grad
+#             yHat=HARnet(x)
+#         testAcc.append( 100*torch.mean(((yHat>0) == y).float()).item())'''
 
-         # Correct way to calculate test accuracy
-        HARnet.eval()
-        correct_predictions = 0
-        total_samples = 0
-        with torch.no_grad():
-            for x_test, y_test in test_loader:
-                outputs_test = HARnet(x_test)
-                _, predicted_test = torch.max(outputs_test.data, 1)
-                total_samples += y_test.size(0)
-                correct_predictions += (predicted_test == y_test).sum().item()
+#          # Correct way to calculate test accuracy
+#         HARnet.eval()
+#         correct_predictions = 0
+#         total_samples = 0
+#         with torch.no_grad():
+#             for x_test, y_test in test_loader:
+#                 outputs_test = HARnet(x_test)
+#                 _, predicted_test = torch.max(outputs_test.data, 1)
+#                 total_samples += y_test.size(0)
+#                 correct_predictions += (predicted_test == y_test).sum().item()
         
-        testAcc.append(100 * correct_predictions / total_samples)
+#         testAcc.append(100 * correct_predictions / total_samples)
     
-    # function output
-    return trainAcc, testAcc, losses
+#     # function output
+#     return trainAcc, testAcc, losses
 
-startTime=time.time()
-input_features = 6
-num_classes = 2
-HARnet=HARModel(input_features, num_classes)
-trainAcc,testAcc,losses = trainTheModel()
+# startTime=time.time()
+# input_features = 6
+# num_classes = 2
+# HARnet=HARModel(input_features, num_classes)
+# trainAcc,testAcc,losses = trainTheModel()
 
-endTime=time.time()
-print(f"your model train for {int((endTime-startTime) // 60)} minutes and {int((endTime-startTime) % 60)} seconds")
+# endTime=time.time()
+# print(f"your model train for {int((endTime-startTime) // 60)} minutes and {int((endTime-startTime) % 60)} seconds")
 
-fig, ax = plt.subplots(1,2,figsize=(6,3))
+# fig, ax = plt.subplots(1,2,figsize=(6,3))
 
-ax[0].plot(trainAcc)
-ax[0].set_title('training accuracy (%)')
-ax[0].set_xlabel('percentage')
-ax[0].set_xlabel('epochs')
+# ax[0].plot(trainAcc)
+# ax[0].set_title('training accuracy (%)')
+# ax[0].set_xlabel('percentage')
+# ax[0].set_xlabel('epochs')
 
-ax[1].plot(testAcc)
-ax[1].set_title('test accuracy (%)')
-ax[1].set_xlabel('percentage')
-ax[1].set_xlabel('epochs')
+# ax[1].plot(testAcc)
+# ax[1].set_title('test accuracy (%)')
+# ax[1].set_xlabel('percentage')
+# ax[1].set_xlabel('epochs')
 
-plt.show()
+# plt.show()
 
-        
