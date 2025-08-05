@@ -134,21 +134,30 @@ def sliding_window(data, window_size, overlap_percentage):
         data: pandas DataFrame
         window_size: int
         overlap_percentage: float (0 < i < 1)
+        Gemini walked through this function with me
     '''
-    
+    # Data columns to be segmented
+    sensor_cols=['accX', 'accY', 'accZ', 'gyroX', 'gyroY', 'gyroZ']
+
+    # Step size based on window size and overlap
     step_size = int(window_size * (1-overlap_percentage))
 
     if step_size <= 0:
         raise ValueError("calculated step size is zero or negative")
     
-    windows=[]
+    windows_with_labels=[]
 
+    # Iterate through the df in steps
     for i in range(0, len(data) - window_size + 1, step_size):
-        window=data[i:i+window_size]
-        windows.append(window)
+        window       = data.iloc[i:i+window_size][sensor_cols]
+        window_label = data.iloc[i:i+window_size]['activity_label'].mode()
 
-    return windows
+        # windows_with_labels.append((window, window_label))
 
-window_list = sliding_window(data,4,0.5)
+    return windows_with_labels
 
-[print(i) for i in window_list]
+window_list = sliding_window(data, 250, 0.3)
+
+# [print(x.shape,y.shape) for x,y in window_list]
+# print(len(window_list))
+print(window_list[0])
