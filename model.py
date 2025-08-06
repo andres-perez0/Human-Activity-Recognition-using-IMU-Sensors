@@ -154,7 +154,7 @@ lr_linspace=np.linspace(0.001,0.1,20)
 trainAcc_list=[]
 testAcc_list=[]
 totalTime_list=[]
-
+complete_time = time.time()
 for i in range(len(lr_linspace)): 
     startTime=time.time()
     HARnet=HARModel(input_features, num_classes)
@@ -165,7 +165,7 @@ for i in range(len(lr_linspace)):
     testAcc_list.append(testAcc[-1])
     totalTime_list.append(endTime-startTime)
     # print(f"your model train for {int((endTime-startTime) // 60)} minutes and {int((endTime-startTime) % 60)} seconds")
-    
+final_time=time.time()
 # startTime=time.time()
 # HARnet=HARModel(input_features, num_classes)
 # trainAcc,testAcc,losses = trainTheModel(learning_rate)
@@ -226,3 +226,51 @@ print('below is the information of the model the performed best in testing ')
 print(f'train acc : {trainAcc_list[max_i]}')
 print(f'best test acc : {testAcc_list[max_i]}')
 print(f'total time : {totalTime_list[max_i]}')
+print(f'complete time : {final_time-complete_time} seconds')
+
+'''
+parameterized_experiments_SGD.png
+window_size : 400
+overlap % : 0.3
+batch_size : 16
+numepochs : 500
+final training : 100.0
+final testing : 83.33333333333333
+final total time : 33.61054587364197
+below is the information of the model the performed best in testing
+train acc : 100.0
+best test acc : 87.5
+total time : 33.33060026168823
+'''
+
+'''
+parameterized_experiments_Adam.png
+window_size : 400
+overlap % : 0.3
+batch_size : 16
+numepochs : 500
+final training : 56.25
+final testing : 54.166666666666664
+final total time : 74.11691856384277
+below is the information of the model the performed best in testing 
+train acc : 100.0
+best test acc : 91.66666666666667
+total time : 63.61462879180908
+complete time : 2144.1998393535614 seconds
+'''
+
+'''
+parameterized_experiments_SGD_2.png
+window_size : 400
+overlap % : 0.3
+batch_size : 16
+numepochs : 500
+final training : 100.0
+final testing : 79.16666666666667
+final total time : 41.307230949401855
+below is the information of the model the performed best in testing
+train acc : 100.0
+best test acc : 83.33333333333333
+total time : 44.20129442214966
+complete time : 861.5473563671112 seconds
+'''
