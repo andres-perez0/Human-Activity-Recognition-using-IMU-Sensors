@@ -64,3 +64,8 @@
     - It can handle non-linearly seperable data using the kernal trick that maps the original features into a higher-dimensional space where they become linearly seperable. 
 
     - Ultimately, a strong performance with SVM and Random forest based models and a lower performance with linear regression means that the data has a <u>non-linear structure</u>.
+
+- `@staticmethod` is a decorator in Python that i sused to define a static method within a class. 
+    - Reminder a static method is a function that is part of the class but does not have access to either a class's or instance's state
+    - Other decorators include `@classmethod` a class method is bounded to the class itself, not to an instance of the class
+        - It can access and modify class-level attributes, but not instnace-level attributes. 

@@ -1,3 +1,6 @@
+# for dp learning
+import torch
+
 # for data processing
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -50,7 +53,7 @@ class dataCtrl():
 
         return windows_with_labels
 
-    def preprocess_and_spilt(self, data: pd.DataFrame, window_size: int, overlap_percentage: float, test_size:float=0.2):
+    def preprocess_and_spilt(self, data: pd.DataFrame, window_size: int, overlap_percentage: float, test_size:float):
         raw_segments = self.sliding_window(data,window_size,overlap_percentage)
 
         # Separate raw data and labels for further processing
@@ -76,6 +79,13 @@ class dataCtrl():
         train_data, test_data, train_labels, test_labels = train_test_split(
             X_standardized, y_encoded, test_size=test_size, stratify=y_encoded, random_state=42
         )
+
+        train_data = torch.from_numpy(train_data).float()
+        test_data = torch.from_numpy(test_data).float()
+
+        train_labels = torch.from_numpy(train_labels).long()
+        test_labels = torch.from_numpy(test_labels).long()
+
         return train_data, test_data, train_labels, test_labels
 
     
