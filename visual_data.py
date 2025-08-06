@@ -54,6 +54,8 @@ class visualData():
             # df_list.append(df[['activity_label','accX','accY','accZ','gyroX','gyroY','gyroZ']])
 
         combine_df = pd.concat(df_list,axis=0,ignore_index=True)
+
+        
         combine_df.to_csv('combine_mpu9250.csv', index=False,encoding='utf-8)')
 
 if __name__ == "__main__": 

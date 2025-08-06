@@ -36,7 +36,6 @@
         # Saves the data and activity as a dictionary and appends it to the list
         windows_with_labels.append({'data':window_data, 'activity_label': window_label})
 
-    # print(len(window_label))
     return windows_with_labels
     ```
 - Time-Series Analysis
@@ -51,3 +50,17 @@
 - Simple verus Deep Learning Models
     - I went crazy with why I was getting high 50 percentage in my models. Until, I took a step to look back. The data I have right now is pretty black and white, so any simple linear regression can do fairly well. Or, I have yet to learn more about decision trees, in particular Random Forest, so I have a lot more thinkering until I gain an intuition with DP, but it'll be fun to do so.
 
+- Linear Regression
+    - Linear model used for binary classification. It assumes a linear relationship between features and the target variable. It tries to map a straight line that best predicts continous target values. So think about housing prices. But in the classification instance, it can seperates two classes. 
+    - Because a linear regression handled classification poorly between just to classes (walking vs sitting), we can conclude it is not a linear fit. Not linearly seperable
+
+- Random Forest
+    - Is an learning method that works by constructing a multitude of decision trees during training and outputting the class that is the mode of the classes for classification or mean predicition for regression.It has a random aspect due to the random subspace method and bootstrap aggregation it does while constructing the tree. 
+    - All together by combining multiple predictions of indendent trees, it reduces the variance of the model and provides a stable and accurate prediciton than a single deep decision tree. 
+
+- SVM
+    - Support Vector Machine is a powerful and versatile algorithm for classification, regression and outlier detection. In our case, it is trying to find an hyperplane that seperates the data point into classes. 
+    - The key idea is to find the hyperplane with the largest margin, or the distance between the hyperplane and the nearest data point from each class which are called support vectors. So imagine drawing a line to seperate a room that give both sides equal space. 
+    - It can handle non-linearly seperable data using the kernal trick that maps the original features into a higher-dimensional space where they become linearly seperable. 
+
+    - Ultimately, a strong performance with SVM and Random forest based models and a lower performance with linear regression means that the data has a <u>non-linear structure</u>.
